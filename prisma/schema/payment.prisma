@@ -1,0 +1,18 @@
+model Payment {
+  id      String        @id @default(uuid())
+  tranId  String        @unique
+  orderId String
+  amount  Decimal       @db.Decimal(10, 2)
+  status  PaymentStatus @default(PENDING)
+
+  // raw SSLCommerz validation payload, kept for auditing
+  meta Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order RentalOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("payments")
+}

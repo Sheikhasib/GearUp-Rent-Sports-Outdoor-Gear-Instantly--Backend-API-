@@ -1,0 +1,26 @@
+model GearItem {
+  id                String   @id @default(uuid())
+  providerId        String
+  categoryId        String
+  name              String
+  description       String
+  brand             String?
+  pricePerDay       Decimal  @db.Decimal(10, 2)
+  quantity          Int      @default(1)
+  availableQuantity Int      @default(1)
+  images            String[]
+  isActive          Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  provider     User          @relation("ProviderGear", fields: [providerId], references: [id], onDelete: Cascade)
+  category     Category      @relation(fields: [categoryId], references: [id])
+  rentalOrders RentalOrder[]
+  reviews      Review[]
+
+  @@index([providerId])
+  @@index([categoryId])
+  @@index([categoryId, pricePerDay])
+  @@map("gear_items")
+}
