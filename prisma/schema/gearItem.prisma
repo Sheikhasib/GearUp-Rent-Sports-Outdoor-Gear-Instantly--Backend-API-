@@ -5,7 +5,7 @@ model GearItem {
   name              String
   description       String
   brand             String?
-  pricePerDay       Decimal  @db.Decimal(10, 2)
+  price             Decimal  @db.Decimal(10, 2)
   quantity          Int      @default(1)
   availableQuantity Int      @default(1)
   images            String[]
@@ -21,6 +21,6 @@ model GearItem {
 
   @@index([providerId])
   @@index([categoryId])
-  @@index([categoryId, pricePerDay])
+  @@index([categoryId, price])
   @@map("gear_items")
 }

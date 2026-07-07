@@ -50,13 +50,11 @@ const globalErrorHandler = (
     statusCode = err.statusCode;
   }
 
-  res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+  res.status(statusCode).json({
     success: false,
     statusCode: statusCode || httpStatus.INTERNAL_SERVER_ERROR,
-    // errorCode: err.code || null,
     name: errorName,
     message: errorMessage,
-    // error: (err as Error).message,
     error: err.stack,
   });
 };
