@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { authRoutes } from "./modules/auth/auth.route";
 import notFoundHandler from "./middleware/notFound";
 import globalErrorHandler from "./middleware/globalErrorHandler";
+import { categoryRoutes } from "./modules/category/category.route";
 
 const app: Application = express();
 
@@ -27,6 +28,9 @@ app.use(cookieParser()); // for parsing cookies
 
 // Auth routes
 app.use("/api/auth", authRoutes);
+
+// Category routes
+app.use("/api/category", categoryRoutes);
 
 // Catches anything that didn't match a route above
 app.use(notFoundHandler);
