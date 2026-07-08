@@ -8,6 +8,7 @@ import globalErrorHandler from "./middleware/globalErrorHandler";
 import { categoryRoutes } from "./modules/category/category.route";
 import { gearRoutes } from "./modules/gear/gear.route";
 import { providerRoutes } from "./modules/provider/provider.route";
+import { rentalOrderRoutes } from "./modules/rentalOrder/rentalOrder.route";
 
 const app: Application = express();
 
@@ -39,6 +40,9 @@ app.use("/api/gear", gearRoutes);
 
 // Provider routes
 app.use("/api/provider", providerRoutes);
+
+// Rental Orders routes
+app.use("/api/rentals", rentalOrderRoutes);
 
 // Catches anything that didn't match a route above
 app.use(notFoundHandler);
