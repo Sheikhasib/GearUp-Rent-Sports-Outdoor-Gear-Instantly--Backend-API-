@@ -1,9 +1,12 @@
 model Payment {
-  id      String        @id @default(uuid())
-  tranId  String        @unique
-  orderId String
-  amount  Decimal       @db.Decimal(10, 2)
-  status  PaymentStatus @default(PENDING)
+  id       String        @id @default(uuid())
+  tranId   String        @unique
+  orderId  String
+  amount   Decimal       @db.Decimal(10, 2)
+  method   String?
+  provider String?
+  status   PaymentStatus @default(PENDING)
+  paidAt   DateTime?
 
   // raw SSLCommerz validation payload, kept for auditing
   meta Json?
