@@ -1,54 +1,59 @@
 import { RentalOrderStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
+import {
+  ALLOWED_TRANSITIONS,
+  calculateRentalDays,
+  getBookedQuantity,
+} from "../../utils/rentalOrderServices";
 import { ICreateRentalOrderPayload, IRequester } from "./rentalOrder.interface";
 
-// The allowed transitions for each order status (update order status logic)
-const ALLOWED_TRANSITIONS: Record<RentalOrderStatus, RentalOrderStatus[]> = {
-  PLACED: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["PAID", "CANCELLED"],
-  PAID: ["PICKED_UP"],
-  PICKED_UP: ["RETURNED"],
-  RETURNED: [],
-  CANCELLED: [],
-};
+// // The allowed transitions for each order status (update order status logic)
+// const ALLOWED_TRANSITIONS: Record<RentalOrderStatus, RentalOrderStatus[]> = {
+//   PLACED: ["CONFIRMED", "CANCELLED"],
+//   CONFIRMED: ["PAID", "CANCELLED"],
+//   PAID: ["PICKED_UP"],
+//   PICKED_UP: ["RETURNED"],
+//   RETURNED: [],
+//   CANCELLED: [],
+// };
 
-// Milliseconds in one day
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
+// // Milliseconds in one day
+// const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
-// Calculates the number of days between two dates
-const calculateRentalDays = (startDate: Date, endDate: Date) => {
-  const days = Math.ceil(
-    (endDate.getTime() - startDate.getTime()) / MS_PER_DAY,
-  );
-  return Math.max(days, 1);
-};
+// // Calculates the number of days between two dates
+// const calculateRentalDays = (startDate: Date, endDate: Date) => {
+//   const days = Math.ceil(
+//     (endDate.getTime() - startDate.getTime()) / MS_PER_DAY,
+//   );
+//   return Math.max(days, 1);
+// };
 
-// Interval-overlap check across every order that's still "live" for this gear item, so a new booking can't over-commit units already held by another customer for overlapping dates. / Check how many units are already booked
-const getBookedQuantity = async (
-  gearItemId: string,
-  startDate: Date,
-  endDate: Date,
-) => {
-  const overlapping = await prisma.rentalOrder.findMany({
-    where: {
-      gearItemId,
-      status: {
-        in: ["PLACED", "CONFIRMED", "PAID", "PICKED_UP"],
-      },
-      startDate: { lt: endDate },
-      endDate: { gt: startDate },
-    },
-    select: { quantity: true },
-  });
+// // Interval-overlap check across every order that's still "live" for this gear item, so a new booking can't over-commit units already held by another customer for overlapping dates. / Check how many units are already booked
+// const getBookedQuantity = async (
+//   gearItemId: string,
+//   startDate: Date,
+//   endDate: Date,
+// ) => {
+//   const overlapping = await prisma.rentalOrder.findMany({
+//     where: {
+//       gearItemId,
+//       status: {
+//         in: ["PLACED", "CONFIRMED", "PAID", "PICKED_UP"],
+//       },
+//       startDate: { lt: endDate },
+//       endDate: { gt: startDate },
+//     },
+//     select: { quantity: true },
+//   });
 
-  const totalBookedQuantity = overlapping.reduce(
-    (sum, rental) => sum + rental.quantity,
-    0,
-  );
+//   const totalBookedQuantity = overlapping.reduce(
+//     (sum, rental) => sum + rental.quantity,
+//     0,
+//   );
 
-  return totalBookedQuantity;
-};
+//   return totalBookedQuantity;
+// };
 
 // 1. Create rental order service
 const createRentalOrder = async (
@@ -182,7 +187,8 @@ const getProviderRentalOrders = async (providerId: string) => {
 // 4. Get rental order by id service
 const getRentalOrderById = async (
   rentalOrderId: string,
-  requester: IRequester,
+  requesterId: string,
+  isAdmin: boolean,
 ) => {
   const rentalOrder = await prisma.rentalOrder.findUniqueOrThrow({
     where: {
@@ -197,12 +203,11 @@ const getRentalOrderById = async (
     },
   });
 
-  // Check if user/requester is authorized or not
-  const isCustomer = rentalOrder.customerId === requester.id;
-  const isProvider = rentalOrder.gearItem.providerId === requester.id;
-  const isAdmin = requester.role === "ADMIN";
-
-  if (!isCustomer && !isProvider && !isAdmin) {
+  if (
+    rentalOrder.gearItem.providerId !== requesterId &&
+    rentalOrder.customerId !== requesterId &&
+    !isAdmin
+  ) {
     throw new AppError(403, "You are not authorized to view this rental order");
   }
 

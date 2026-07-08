@@ -63,15 +63,14 @@ const getProviderRentalOrders = catchAsync(async (req, res) => {
 
 // 4. Get rental order by id controller
 const getRentalOrderById = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const user = req.user as any;
+  const rentalOrderId = req.params.id as string;
+  const requesterId = req.user?.id as string;
+  const isAdmin = req.user?.role === "ADMIN";
 
   const rentalOrder = await rentalOrderService.getRentalOrderById(
-    id as string,
-    {
-      id: user.id,
-      role: user.role,
-    },
+    rentalOrderId,
+    requesterId,
+    isAdmin,
   );
 
   sendResponse(res, {
@@ -104,9 +103,7 @@ const cancelRentalOrder = catchAsync(async (req, res) => {
 
 // 6. Update rental order status controller
 const updateRentalOrderStatus = catchAsync(async (req, res) => {
-  //   const { id } = req.params;
   const rentalOrderId = req.params.id as string;
-  //   const user = req.user as any;
   const providerId = req.user?.id as string;
   const isAdmin = req.user?.role === "ADMIN";
   const rentalOrderStatus = req.body.status;
