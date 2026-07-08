@@ -4,21 +4,22 @@ type TMeta = {
   page: number;
   limit: number;
   total: number;
+  totalPages: number;
 };
 
 type TResponseData<T> = {
   success: boolean;
   statusCode: number;
   message: string;
-  meta?: TMeta;
   data: T;
+  meta?: TMeta;
 };
 
 export const sendResponse = <T>(res: Response, data: TResponseData<T>) => {
   res.status(data.statusCode).json({
     success: data.success,
     message: data.message,
-    meta: data.meta,
     data: data.data,
+    meta: data.meta,
   });
 };

@@ -6,6 +6,8 @@ import { authRoutes } from "./modules/auth/auth.route";
 import notFoundHandler from "./middleware/notFound";
 import globalErrorHandler from "./middleware/globalErrorHandler";
 import { categoryRoutes } from "./modules/category/category.route";
+import { gearRoutes } from "./modules/gear/gear.route";
+import { providerRoutes } from "./modules/provider/provider.route";
 
 const app: Application = express();
 
@@ -30,7 +32,13 @@ app.use(cookieParser()); // for parsing cookies
 app.use("/api/auth", authRoutes);
 
 // Category routes
-app.use("/api/category", categoryRoutes);
+app.use("/api/categories", categoryRoutes);
+
+// Gear routes
+app.use("/api/gear", gearRoutes);
+
+// Provider routes
+app.use("/api/provider", providerRoutes);
 
 // Catches anything that didn't match a route above
 app.use(notFoundHandler);
