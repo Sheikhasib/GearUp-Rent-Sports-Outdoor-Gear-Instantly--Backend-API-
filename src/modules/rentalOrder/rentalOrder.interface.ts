@@ -6,3 +6,8 @@ export interface ICreateRentalOrderPayload {
   startDate: string;
   endDate: string;
 }
+
+export interface IRequester {
+  id: string;
+  role: string;
+}

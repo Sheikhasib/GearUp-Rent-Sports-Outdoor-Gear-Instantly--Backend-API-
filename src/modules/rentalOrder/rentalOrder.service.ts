@@ -1,7 +1,7 @@
 import { RentalOrderStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { AppError } from "../../utils/appError";
-import { ICreateRentalOrderPayload } from "./rentalOrder.interface";
+import { ICreateRentalOrderPayload, IRequester } from "./rentalOrder.interface";
 
 // The allowed transitions for each order status (update order status logic)
 const ALLOWED_TRANSITIONS: Record<RentalOrderStatus, RentalOrderStatus[]> = {
@@ -180,19 +180,131 @@ const getProviderRentalOrders = async (providerId: string) => {
 };
 
 // 4. Get rental order by id service
-const getRentalOrder = async (rentalOrderId: string) => {};
+const getRentalOrderById = async (
+  rentalOrderId: string,
+  requester: IRequester,
+) => {
+  const rentalOrder = await prisma.rentalOrder.findUniqueOrThrow({
+    where: {
+      id: rentalOrderId,
+    },
+    include: {
+      gearItem: true,
+      customer: {
+        select: { id: true, name: true, email: true },
+      },
+      payments: true,
+    },
+  });
+
+  // Check if user/requester is authorized or not
+  const isCustomer = rentalOrder.customerId === requester.id;
+  const isProvider = rentalOrder.gearItem.providerId === requester.id;
+  const isAdmin = requester.role === "ADMIN";
+
+  if (!isCustomer && !isProvider && !isAdmin) {
+    throw new AppError(403, "You are not authorized to view this rental order");
+  }
+
+  return rentalOrder;
+};
 
 // 5. Cancel rental order service
-const cancelRentalOrder = async (rentalOrderId: string) => {};
+const cancelRentalOrder = async (
+  rentalOrderId: string,
+  requesterId: string,
+  isAdmin: boolean,
+) => {
+  const rentalOrder = await prisma.rentalOrder.findUniqueOrThrow({
+    where: {
+      id: rentalOrderId,
+    },
+  });
 
-// 6. Update rental order service by provider
-const updateRentalOrder = async (rentalOrderId: string) => {};
+  // 1. Check if user/requester is authorized or not
+  if (rentalOrder.customerId !== requesterId && !isAdmin) {
+    throw new AppError(
+      403,
+      "You are not authorized to cancel this rental order",
+    );
+  }
+
+  // 2. Check if order can be cancelled
+  if (!ALLOWED_TRANSITIONS[rentalOrder.status].includes("CANCELLED")) {
+    throw new AppError(
+      400,
+      `An order with status "${rentalOrder.status}" can no longer be cancelled`,
+    );
+  }
+
+  // 3. Update status to "CANCELLED"
+  const updatedRentalOrder = await prisma.rentalOrder.update({
+    where: {
+      id: rentalOrderId,
+    },
+    data: {
+      status: "CANCELLED",
+    },
+  });
+
+  return updatedRentalOrder;
+};
+
+// 6. Update rental order status service by provider
+const updateRentalOrderStatus = async (
+  rentalOrderId: string,
+  providerId: string,
+  isAdmin: boolean,
+  newrentalOrderStatus: RentalOrderStatus,
+) => {
+  const rentalOrder = await prisma.rentalOrder.findUniqueOrThrow({
+    where: {
+      id: rentalOrderId,
+    },
+    include: {
+      gearItem: true,
+    },
+  });
+
+  // 1. Check if user is authorized or not to update
+  if (rentalOrder.gearItem.providerId !== providerId && !isAdmin) {
+    throw new AppError(
+      403,
+      "You are not authorized to update this rental order status",
+    );
+  }
+
+  // 2. prevent same-status update to avoid duplicate records
+  if (rentalOrder.status === newrentalOrderStatus) {
+    throw new AppError(400, `Rental order is already ${newrentalOrderStatus}`);
+  }
+
+  // 3. validate status transition
+  if (!ALLOWED_TRANSITIONS[rentalOrder.status].includes("CANCELLED")) {
+    throw new AppError(
+      400,
+      `An order with status "${rentalOrder.status}" can no longer be cancelled`,
+    );
+  }
+
+  // 4. update status
+  const updatedRentalOrderStatus = await prisma.rentalOrder.update({
+    where: {
+      id: rentalOrderId,
+    },
+    data: {
+      status: newrentalOrderStatus,
+    },
+  });
+
+  return updatedRentalOrderStatus;
+};
 
 export const rentalOrderService = {
   createRentalOrder,
   getCustomerRentalOrders,
   getProviderRentalOrders,
-  getRentalOrder,
+  getRentalOrderById,
   cancelRentalOrder,
-  updateRentalOrder,
+  updateRentalOrderStatus,
 };

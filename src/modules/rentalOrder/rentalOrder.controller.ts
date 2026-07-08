@@ -62,19 +62,75 @@ const getProviderRentalOrders = catchAsync(async (req, res) => {
 });
 
 // 4. Get rental order by id controller
-const getRentalOrder = catchAsync(async (req, res) => {});
+const getRentalOrderById = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = req.user as any;
+
+  const rentalOrder = await rentalOrderService.getRentalOrderById(
+    id as string,
+    {
+      id: user.id,
+      role: user.role,
+    },
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Rental Order retrieved successfully.",
+    data: rentalOrder,
+  });
+});
 
 // 5. Cancel rental order controller
-const cancelRentalOrder = catchAsync(async (req, res) => {});
+const cancelRentalOrder = catchAsync(async (req, res) => {
+  const rentalOrderId = req.params.id as string;
+  const requesterId = req.user?.id as string;
+  const isAdmin = req.user?.role === "ADMIN";
 
-// 6. Update rental order controller
-const updateRentalOrder = catchAsync(async (req, res) => {});
+  const rentalOrder = await rentalOrderService.cancelRentalOrder(
+    rentalOrderId,
+    requesterId,
+    isAdmin,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Rental Order cancelled successfully.",
+    data: rentalOrder,
+  });
+});
+
+// 6. Update rental order status controller
+const updateRentalOrderStatus = catchAsync(async (req, res) => {
+  //   const { id } = req.params;
+  const rentalOrderId = req.params.id as string;
+  //   const user = req.user as any;
+  const providerId = req.user?.id as string;
+  const isAdmin = req.user?.role === "ADMIN";
+  const rentalOrderStatus = req.body.status;
+
+  const newrentalOrderStatus = await rentalOrderService.updateRentalOrderStatus(
+    rentalOrderId,
+    providerId,
+    isAdmin,
+    rentalOrderStatus,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Rental Order status updated successfully.",
+    data: newrentalOrderStatus,
+  });
+});
 
 export const rentalOrderController = {
   createRentalOrder,
   getCustomerRentalOrders,
   getProviderRentalOrders,
-  getRentalOrder,
+  getRentalOrderById,
   cancelRentalOrder,
-  updateRentalOrder,
+  updateRentalOrderStatus,
 };

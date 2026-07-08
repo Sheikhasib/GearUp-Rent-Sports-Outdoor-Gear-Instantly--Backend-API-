@@ -28,11 +28,11 @@ router.get(
   rentalOrderController.getProviderRentalOrders,
 );
 
-// 6. Update rental order route
+// 6. Update rental order status route
 router.patch(
   "/rentalOrders/:id",
   auth(Role.PROVIDER),
-  rentalOrderController.updateRentalOrder,
+  rentalOrderController.updateRentalOrderStatus,
 );
 
 export const providerRoutes = router;
