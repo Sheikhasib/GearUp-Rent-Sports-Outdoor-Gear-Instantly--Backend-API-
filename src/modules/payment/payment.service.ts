@@ -4,6 +4,11 @@ import config from "../../config";
 import { AppError } from "../../utils/appError";
 import { prisma } from "../../lib/prisma";
 
+const SSLCOMMERZ_INIT_URL =
+  "https://sandbox.sslcommerz.com/gwprocess/v4/api.php";
+const SSLCOMMERZ_VALIDATE_URL =
+  "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php";
+
 // 1. Initiate SSLCommerz payment service
 const initiatePayment = async (order: RentalOrder, user: User) => {
   const tranId = `TRNX_ID_${Date.now()}`;
@@ -31,7 +36,7 @@ const initiatePayment = async (order: RentalOrder, user: User) => {
   };
 
   // 2. Send payment data to SSLCommerz
-  const response = await axios.post(config.ssl_commerz_init_url, paymentData, {
+  const response = await axios.post(SSLCOMMERZ_INIT_URL, paymentData, {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
   });
 
@@ -55,7 +60,7 @@ const initiatePayment = async (order: RentalOrder, user: User) => {
       amount: order.totalPrice as any,
       provider: "SSLCommerz",
       method: null,
-      status: "PENDING",
+      //   status: "PENDING",
     },
   });
 
@@ -68,32 +73,32 @@ const initiatePayment = async (order: RentalOrder, user: User) => {
 };
 
 // 2. Create payment session
-// const createPaymentSession = async (
-//   customerId: string,
-//   rentalOrderId: string,
-// ) => {
-//   const order = await prisma.rentalOrder.findUniqueOrThrow({
-//     where: {
-//       id: rentalOrderId,
-//     },
-//     include: {
-//       customer: true,
-//     },
-//   });
+const createPaymentSession = async (
+  customerId: string,
+  rentalOrderId: string,
+) => {
+  const order = await prisma.rentalOrder.findUniqueOrThrow({
+    where: {
+      id: rentalOrderId,
+    },
+    include: {
+      customer: true,
+    },
+  });
 
-//   // Check if order belongs to the customer
-//   if (order.customerId !== customerId) {
-//     throw new AppError(
-//       403,
-//       "You do not have permission to pay for this order.",
-//     );
-//   }
+  // Check if order belongs to the customer
+  if (order.customerId !== customerId) {
+    throw new AppError(
+      403,
+      "You do not have permission to pay for this order.",
+    );
+  }
 
-//   // Initiate payment
-//   const paymentUrl = await initiatePayment(order, order.customer);
+  // Initiate payment
+  const paymentUrl = await initiatePayment(order, order.customer);
 
-//   return paymentUrl;
-// };
+  return { paymentUrl };
+};
 
 // 3. Confirm payment
 const confirmPayment = async (
@@ -113,7 +118,7 @@ const confirmPayment = async (
 
   // Validate payment from SSLCommerz
   const response = await axios.post(
-    `${config.ssl_commerz_validate_url}?val_id=${payload.val_id}&store_id=${config.ssl_commerz_store_id}&store_passwd=${config.ssl_commerz_store_passwd}&format=json`,
+    `${SSLCOMMERZ_VALIDATE_URL}?val_id=${payload.val_id}&store_id=${config.ssl_commerz_store_id}&store_passwd=${config.ssl_commerz_store_passwd}&format=json`,
     {},
     { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
   );
@@ -168,55 +173,55 @@ const confirmPayment = async (
 };
 
 // 4. Get Customer payment
-// const getCustomerPayment = async (customerId: string) => {
-//   const customerPayment = await prisma.payment.findMany({
-//     where: {
-//       order: {
-//         customerId,
-//       },
-//     },
-//     orderBy: {
-//       createdAt: "desc",
-//     },
-//     include: {
-//       order: {
-//         select: {
-//           id: true,
-//           gearItem: { select: { name: true } },
-//         },
-//       },
-//     },
-//   });
+const getCustomerPayment = async (customerId: string) => {
+  const customerPayment = await prisma.payment.findMany({
+    where: {
+      order: {
+        customerId,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      order: {
+        select: {
+          id: true,
+          gearItem: { select: { name: true } },
+        },
+      },
+    },
+  });
 
-//   return customerPayment;
-// };
+  return customerPayment;
+};
 
 // 5. Get Payment By Id
-// const getPaymentById = async (
-//   paymentId: string,
-//   customerId: string,
-//   isAdmin: boolean,
-// ) => {
-//   const payment = await prisma.payment.findUniqueOrThrow({
-//     where: {
-//       id: paymentId,
-//     },
-//     include: {
-//       order: true,
-//     },
-//   });
+const getPaymentById = async (
+  paymentId: string,
+  customerId: string,
+  isAdmin: boolean,
+) => {
+  const payment = await prisma.payment.findUniqueOrThrow({
+    where: {
+      id: paymentId,
+    },
+    include: {
+      order: true,
+    },
+  });
 
-//   if (payment.order.customerId !== customerId && !isAdmin) {
-//     throw new AppError(403, "You do not have permission to view this payment.");
-//   }
+  if (payment.order.customerId !== customerId && !isAdmin) {
+    throw new AppError(403, "You do not have permission to view this payment.");
+  }
 
-//   return payment;
-// };
+  return payment;
+};
 
 export const paymentService = {
   initiatePayment,
-  //   createPaymentSession,
+  createPaymentSession,
   confirmPayment,
-  //   getCustomerPayment,
-  //   getPaymentById,
+  getCustomerPayment,
+  getPaymentById,
 };

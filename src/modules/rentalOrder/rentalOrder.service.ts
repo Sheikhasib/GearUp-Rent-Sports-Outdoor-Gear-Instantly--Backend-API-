@@ -119,6 +119,8 @@ const createRentalOrder = async (
     paymentUrl: paymentSession.paymentUrl,
     tranId: paymentSession.tranId,
   };
+
+  //   return createdRentalOrderTransaction;
 };
 
 // 2. Get Customer rental orders service
