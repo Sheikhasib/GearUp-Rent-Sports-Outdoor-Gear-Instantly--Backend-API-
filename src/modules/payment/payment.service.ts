@@ -11,65 +11,76 @@ const SSLCOMMERZ_VALIDATE_URL =
 
 // 1. Initiate SSLCommerz payment service
 const initiatePayment = async (order: RentalOrder, user: User) => {
-  const tranId = `TRNX_ID_${Date.now()}`;
+  try {
+    const tranId = `TRNX_ID_${Date.now()}`;
 
-  // 1. Prepare payment data
-  const paymentData = {
-    store_id: config.ssl_commerz_store_id,
-    store_passwd: config.ssl_commerz_store_passwd,
-    total_amount: order.totalPrice,
-    currency: "BDT",
-    tran_id: tranId,
-    success_url: `${config.app_url}/api/payments/confirm?orderId=${order.id}&tranId=${tranId}&status=success`,
-    fail_url: `${config.app_url}/api/payments/confirm?orderId=${order.id}&tranId=${tranId}&status=fail`,
-    cancel_url: `${config.app_url}/api/payments/confirm?orderId=${order.id}&tranId=${tranId}&status=cancel`,
-    cus_name: user.name,
-    cus_email: user.email,
-    cus_add1: "N/A",
-    cus_add2: "N/A",
-    cus_city: "N/A",
-    cus_state: "N/A",
-    cus_postcode: 1000,
-    cus_country: "Bangladesh",
-    cus_phone: "01711111111",
-    cus_fax: "01711111111",
-  };
+    // 1. Prepare payment data
+    const paymentData = {
+      store_id: config.ssl_commerz_store_id,
+      store_passwd: config.ssl_commerz_store_passwd,
+      total_amount: order.totalPrice,
+      currency: "BDT",
+      tran_id: tranId,
+      success_url: `${config.app_url}/api/payments/confirm?orderId=${order.id}&tranId=${tranId}&status=success`,
+      fail_url: `${config.app_url}/api/payments/confirm?orderId=${order.id}&tranId=${tranId}&status=fail`,
+      cancel_url: `${config.app_url}/api/payments/confirm?orderId=${order.id}&tranId=${tranId}&status=cancel`,
+      cus_name: user.name,
+      cus_email: user.email,
+      cus_add1: "N/A",
+      cus_add2: "N/A",
+      cus_city: "N/A",
+      cus_state: "N/A",
+      cus_postcode: 1000,
+      cus_country: "Bangladesh",
+      cus_phone: "01711111111",
+      cus_fax: "01711111111",
+    };
 
-  // 2. Send payment data to SSLCommerz
-  const response = await axios.post(SSLCOMMERZ_INIT_URL, paymentData, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
+    // 2. Send payment data to SSLCommerz
+    const response = await axios.post(SSLCOMMERZ_INIT_URL, paymentData, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
 
-  // 3. Check if payment was successful
-  const data = await response.data;
+    // 3. Check if payment was successful
+    const data = await response.data;
 
-  console.log(data);
+    console.log(data);
 
-  if (data.status !== "SUCCESS" || !data.GatewayPageURL) {
+    if (data.status !== "SUCCESS" || !data.GatewayPageURL) {
+      throw new AppError(
+        502,
+        `Failed to initiate payment: ${data.failedreason || "unknown error"}`,
+      );
+    }
+
+    // create payment
+    await prisma.payment.create({
+      data: {
+        tranId,
+        orderId: order.id,
+        amount: order.totalPrice as any,
+        provider: "SSLCommerz",
+        method: null,
+        //   status: "PENDING",
+      },
+    });
+
+    const GatewayPageURL = data.GatewayPageURL as string;
+
+    return {
+      paymentUrl: GatewayPageURL,
+      tranId,
+    };
+  } catch (error: any) {
+    console.log("SSL PAYMENT INIT ERROR:", error?.response?.data || error);
+
     throw new AppError(
-      502,
-      `Failed to initiate payment: ${data.failedreason || "unknown error"}`,
+      500,
+      error?.response?.data?.failedreason ||
+        error?.message ||
+        "Failed to initiate payment",
     );
   }
-
-  // create payment
-  await prisma.payment.create({
-    data: {
-      tranId,
-      orderId: order.id,
-      amount: order.totalPrice as any,
-      provider: "SSLCommerz",
-      method: null,
-      //   status: "PENDING",
-    },
-  });
-
-  const GatewayPageURL = data.GatewayPageURL as string;
-
-  return {
-    paymentUrl: GatewayPageURL,
-    tranId,
-  };
 };
 
 // 2. Create payment session
