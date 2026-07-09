@@ -1,5 +1,5 @@
 export interface ICreateReviewPayload {
-  renatalOrderId: string;
+  rentalOrderId: string;
   rating: number;
   comment: string;
 }

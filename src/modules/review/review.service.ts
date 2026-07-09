@@ -9,7 +9,7 @@ const createReview = async (
 ) => {
   const order = await prisma.rentalOrder.findUniqueOrThrow({
     where: {
-      id: payload.renatalOrderId,
+      id: payload.rentalOrderId,
     },
     include: {
       review: true,
@@ -40,6 +40,8 @@ const createReview = async (
       comment: payload.comment,
     },
   });
+
+  return createdReview;
 };
 
 export const reviewService = { createReview };
