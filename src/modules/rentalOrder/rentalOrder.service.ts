@@ -6,6 +6,7 @@ import {
   calculateRentalDays,
   getBookedQuantity,
 } from "../../utils/rentalOrderServices";
+import { paymentService } from "../payment/payment.service";
 import { ICreateRentalOrderPayload } from "./rentalOrder.interface";
 
 // 1. Create rental order service
@@ -13,88 +14,111 @@ const createRentalOrder = async (
   customerId: string,
   payload: ICreateRentalOrderPayload,
 ) => {
-  const transactionResult = await prisma.$transaction(async (tx) => {
-    // 1. Convert strings to dates (UTC)
-    const startDate = new Date(payload.startDate);
-    const endDate = new Date(payload.endDate);
+  // 1. Create the rental order inside transaction
+  const createdRentalOrderTransaction = await prisma.$transaction(
+    async (tx) => {
+      // 1. Convert strings to dates (UTC)
+      const startDate = new Date(payload.startDate);
+      const endDate = new Date(payload.endDate);
 
-    // Check if dates are valid
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      throw new AppError(400, "Invalid startDate or endDate");
-    }
+      // Check if dates are valid
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new AppError(400, "Invalid startDate or endDate");
+      }
 
-    // 2. Default quantity to 1 if not provided
-    const quantity = payload.quantity || 1;
+      // 2. Default quantity to 1 if not provided
+      const quantity = payload.quantity || 1;
 
-    // 3. Validate date order
-    if (endDate <= startDate) {
-      throw new AppError(400, "End date must be after start date");
-    }
+      // 3. Validate date order
+      if (endDate <= startDate) {
+        throw new AppError(400, "End date must be after start date");
+      }
 
-    // 3. Find gear item
-    const gear = await tx.gearItem.findUnique({
-      where: {
-        id: payload.gearItemId,
-      },
-    });
+      // 3. Find gear item
+      const gear = await tx.gearItem.findUnique({
+        where: {
+          id: payload.gearItemId,
+        },
+      });
 
-    // 5. Check gear exists and is active
-    if (!gear || !gear.isAvailable) {
-      throw new AppError(404, "Gear item not found or is no longer available");
-    }
+      // 5. Check gear exists and is active
+      if (!gear || !gear.isAvailable) {
+        throw new AppError(
+          404,
+          "Gear item not found or is no longer available",
+        );
+      }
 
-    // 6. Find overlapping orders for same gear item / check quantity
-    const booked = await getBookedQuantity(
-      payload.gearItemId,
-      startDate,
-      endDate,
-    );
-
-    // 7. Calculate remaining stock
-    const remaining = gear.quantity - booked;
-
-    // 8. Reject if requested quantity is too high
-    if (quantity > remaining) {
-      throw new AppError(
-        400,
-        `Only ${remaining} unit(s) of this gear are available for the selected dates`,
+      // 6. Find overlapping orders for same gear item / check quantity
+      const booked = await getBookedQuantity(
+        payload.gearItemId,
+        startDate,
+        endDate,
       );
-    }
 
-    // 9. Calculate rental days
-    const rentalDays = calculateRentalDays(startDate, endDate);
+      // 7. Calculate remaining stock
+      const remaining = gear.quantity - booked;
 
-    // 10. Calculate total price
-    const totalPrice = Number(gear.priceRatePerDay) * quantity * rentalDays;
+      // 8. Reject if requested quantity is too high
+      if (quantity > remaining) {
+        throw new AppError(
+          400,
+          `Only ${remaining} unit(s) of this gear are available for the selected dates`,
+        );
+      }
 
-    // 11. Create rental order
-    const createdRentalOrder = tx.rentalOrder.create({
-      data: {
-        customerId,
-        gearItemId: payload.gearItemId,
-        startDate, // use converted Date object
-        endDate, // use converted Date object
-        quantity, // use defaulted quantity value
-        totalPrice,
-        status: "PLACED",
-      },
-      include: {
-        gearItem: {
-          select: {
-            name: true,
-            priceRatePerDay: true,
-            images: true,
+      // 9. Calculate rental days
+      const rentalDays = calculateRentalDays(startDate, endDate);
+
+      // 10. Calculate total price
+      const totalPrice = Number(gear.priceRatePerDay) * quantity * rentalDays;
+
+      // 11. Create rental order
+      const createdRentalOrder = await tx.rentalOrder.create({
+        data: {
+          customerId,
+          gearItemId: payload.gearItemId,
+          startDate, // use converted Date object
+          endDate, // use converted Date object
+          quantity, // use defaulted quantity value
+          totalPrice,
+          status: "PLACED",
+        },
+        include: {
+          gearItem: {
+            select: {
+              name: true,
+              priceRatePerDay: true,
+              images: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // 12. we have to payment
+      return createdRentalOrder;
+    },
+  );
 
-    return createdRentalOrder;
+  // 2. Get customer info for payment, we fetch the customer because initiatePayment() needs a User object
+  const customer = await prisma.user.findUnique({
+    where: { id: customerId },
   });
 
-  return transactionResult;
+  if (!customer) {
+    throw new AppError(404, "Customer not found");
+  }
+
+  // 3. Initiate payment after order creation
+  const paymentSession = await paymentService.initiatePayment(
+    createdRentalOrderTransaction,
+    customer,
+  );
+
+  return {
+    rentalOrder: createdRentalOrderTransaction,
+    paymentUrl: paymentSession.paymentUrl,
+    tranId: paymentSession.tranId,
+  };
 };
 
 // 2. Get Customer rental orders service

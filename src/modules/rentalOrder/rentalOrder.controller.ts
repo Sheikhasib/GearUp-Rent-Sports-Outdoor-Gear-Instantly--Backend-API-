@@ -18,16 +18,14 @@ const createRentalOrder = catchAsync(async (req, res) => {
     throw new AppError(400, "gearItemId, startDate and endDate are required");
   }
 
-  const rentalOrder = await rentalOrderService.createRentalOrder(
-    customerId,
-    payload,
-  );
+  const { rentalOrder, paymentUrl, tranId } =
+    await rentalOrderService.createRentalOrder(customerId, payload);
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.CREATED,
     message: "Rental Order created successfully.",
-    data: rentalOrder,
+    data: { rentalOrder, paymentUrl, tranId },
   });
 });
 
