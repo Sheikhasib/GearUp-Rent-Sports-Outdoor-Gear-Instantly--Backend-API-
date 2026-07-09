@@ -45,7 +45,64 @@ const updateUserStatus = async (userId: string, status: UserStatus) => {
   return updatedUserStatus;
 };
 
+// 3. Get All Gear Items service
+const getAllGears = async () => {
+  const allGears = await prisma.gearItem.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      provider: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  return allGears;
+};
+
+// 4. Get All Rental Orders service
+const getAllRentalOrders = async () => {
+  const allRentalOrders = await prisma.rentalOrder.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      gearItem: {
+        select: {
+          id: true,
+          name: true,
+          providerId: true,
+        },
+      },
+      payments: {
+        select: { status: true },
+      },
+    },
+  });
+
+  return allRentalOrders;
+};
+
 export const adminService = {
   getAllUsers,
   updateUserStatus,
+  getAllGears,
+  getAllRentalOrders,
 };
