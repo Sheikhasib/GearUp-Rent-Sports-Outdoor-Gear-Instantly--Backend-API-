@@ -25,7 +25,7 @@ app.use(
 
 // Home/Root route
 app.get("/", async (req: Request, res: Response) => {
-  res.send("Welcome to the GearUp API!");
+  res.send("Welcome to the GearUp Rental API!");
 });
 
 app.use(express.json()); // for parsing application/json
