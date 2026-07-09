@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { adminController } from "./admin.controller";
+import auth from "../../middleware/auth";
+import { Role } from "../../../generated/prisma/enums";
 
 const router = Router();
 
 // 1. Get All Users route
-router.get("/users", adminController.getAllUsers);
+router.get("/users", auth(Role.ADMIN), adminController.getAllUsers);
 
 // 2. Update User Status
 router.patch("/users/:id", adminController.updateUserStatus);

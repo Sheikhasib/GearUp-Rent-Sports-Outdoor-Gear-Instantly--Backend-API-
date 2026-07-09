@@ -11,6 +11,8 @@ const getAllUsers = async (role?: string) => {
       createdAt: "desc",
     },
   });
+
+  return allUsers;
 };
 
 export const adminService = {
