@@ -10,6 +10,8 @@ import { gearRoutes } from "./modules/gear/gear.route";
 import { providerRoutes } from "./modules/provider/provider.route";
 import { rentalOrderRoutes } from "./modules/rentalOrder/rentalOrder.route";
 import { paymentRoutes } from "./modules/payment/payment.route";
+import { reviewRoutes } from "./modules/review/review.route";
+import { adminRoutes } from "./modules/admin/admin.route";
 
 const app: Application = express();
 
@@ -47,6 +49,12 @@ app.use("/api/rentals", rentalOrderRoutes);
 
 // Payment routes
 app.use("/api/payments", paymentRoutes);
+
+// Review routes
+app.use("/api/reviews", reviewRoutes);
+
+// Admin routes
+app.use("/api/admin", adminRoutes);
 
 // Catches anything that didn't match a route above
 app.use(notFoundHandler);

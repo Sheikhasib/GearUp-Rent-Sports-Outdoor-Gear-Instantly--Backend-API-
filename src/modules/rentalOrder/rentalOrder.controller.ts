@@ -20,12 +20,17 @@ const createRentalOrder = catchAsync(async (req, res) => {
 
   const { rentalOrder, paymentUrl, tranId } =
     await rentalOrderService.createRentalOrder(customerId, payload);
+  //   const rentalOrder = await rentalOrderService.createRentalOrder(
+  //     customerId,
+  //     payload,
+  //   );
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.CREATED,
     message: "Rental Order created successfully.",
     data: { rentalOrder, paymentUrl, tranId },
+    // data: rentalOrder,
   });
 });
 
