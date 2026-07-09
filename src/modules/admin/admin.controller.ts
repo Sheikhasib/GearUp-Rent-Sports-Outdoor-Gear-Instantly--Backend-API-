@@ -18,7 +18,19 @@ const getAllUsers = catchAsync(async (req, res) => {
 });
 
 // 2. Update User Status controller
-const updateUserStatus = catchAsync(async (req, res) => {});
+const updateUserStatus = catchAsync(async (req, res) => {
+  const userId = req.params.id as string;
+  const status = req.body.status;
+
+  const user = await adminService.updateUserStatus(userId, status);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "User status updated successfully.",
+    data: user,
+  });
+});
 
 // 3. Get All Gear Items controller
 const getAllGears = catchAsync(async (req, res) => {});

@@ -9,12 +9,16 @@ const router = Router();
 router.get("/users", auth(Role.ADMIN), adminController.getAllUsers);
 
 // 2. Update User Status
-router.patch("/users/:id", adminController.updateUserStatus);
+router.patch("/users/:id", auth(Role.ADMIN), adminController.updateUserStatus);
 
 // 3. Get All Gear Items route
-router.get("/gear", adminController.getAllGears);
+router.get("/gear", auth(Role.ADMIN), adminController.getAllGears);
 
 // 4. Get All Rental Orders route
-router.get("/rentalOrders", adminController.getAllRentalOrders);
+router.get(
+  "/rentalOrders",
+  auth(Role.ADMIN),
+  adminController.getAllRentalOrders,
+);
 
 export const adminRoutes = router;
