@@ -69,7 +69,7 @@ Rent Sports & Outdoor Gear Instantly. A backend-only REST API where customers br
 
 Modular pattern — each feature owns its own folder with a consistent file set:
 
-```ts
+```text
 src/
 ├── modules/
 │   ├── auth/
