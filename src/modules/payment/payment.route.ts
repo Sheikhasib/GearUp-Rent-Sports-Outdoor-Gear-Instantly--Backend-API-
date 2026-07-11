@@ -16,14 +16,14 @@ router.post(
 // SSLCommerz posts here directly - see comment in payment.controller.ts
 router.post("/confirm", paymentController.confirmPayment);
 
-// 3. Get Customer payment route
+// 3. Get Customer payment history route
 router.get(
   "/customer",
   auth(Role.CUSTOMER),
   paymentController.getCustomerPayment,
 );
 
-// 4. Get Payment By Id route
+// 4. Get Payment Details By Id route
 router.get("/:id", auth(), paymentController.getPaymentById);
 
 export const paymentRoutes = router;

@@ -52,7 +52,7 @@ const confirmPayment = catchAsync(async (req, res) => {
   });
 });
 
-// 3. Get Customer payment controller
+// 3. Get Customer payment history controller
 const getCustomerPayment = catchAsync(async (req, res) => {
   const customerId = req.user?.id as string;
 
@@ -66,7 +66,7 @@ const getCustomerPayment = catchAsync(async (req, res) => {
   });
 });
 
-// 4. Get Payment By Id controller
+// 4. Get Payment Details By Id controller
 const getPaymentById = catchAsync(async (req, res) => {
   const paymentId = req.params.id as string;
   const customerId = req.user?.id as string;

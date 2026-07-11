@@ -1,10 +1,11 @@
 {
   "info": {
-    "_postman_id": "2f236d94-6354-4202-9819-dd21119bc923",
+    "_postman_id": "4747e269-1e21-461c-a931-3537ba815d33",
     "name": "Gear Up",
+    "description": "# 🚀 GearUp Rental API\n\nGearUp is a Sports & Outdoor Equipment Rental Platform.\n\nThis API allows customers to rent equipment, providers to manage inventory, and administrators to oversee the platform.\n\n## 🔒 Authentication\n\nAuthentication uses JWT Bearer Token.\n\nAfter logging in, copy the access token and set\n\nAuthorization  \nBearer Token\n\n{{accessToken}}\n\n## Base URL\n\n#### Development\n\n[http://localhost:4](http://localhost:4000)[000](http://localhost:4000)\n\n#### Production\n\n[https://gearup-rental-api.vercel.app](https://your-domain.vercel.app/api)\n\n## 👤 Allowed Roles\n\nAdmin\n\nProvider\n\nCustomer\n\n## Response Format\n\n## 📤 Success Format\n\n{  \n\"success\": true,  \n\"statusCode\": 200,  \n\"message\": \"Success message\",  \n\"data\": {}  \n}\n\n## ❌ Error Format\n\n{  \n\"success\": false,  \n\"message\": \"Something went wrong\",  \n\"errorDetails\": {}  \n}\n\n## 📝 Status Flow\n\nOne section should explain the complete rental lifecycle.\n\nPLACED  \n│  \n▼  \nCONFIRMED  \n│  \n▼  \nPAID  \n│  \n▼  \nPICKED_UP  \n│  \n▼  \nRETURNED\n\nPLACED ─────────► CANCELLED\n\nCONFIRMED ──────► CANCELLED\n\n## 📝 Payment Flow\n\nCustomer  \n│  \n▼  \nCreate Rental  \n│  \n▼  \nRental Order Created  \n│  \n▼  \nSSLCommerz Session  \n│  \n▼  \npaymentUrl Returned  \n│  \n▼  \nCustomer Pays  \n│  \n▼  \nSSLCommerz Callback  \n│  \n▼  \nValidate Transaction  \n│  \n▼  \nPayment → PAID  \n│  \n▼  \nRental → PAID\n\n## ❌ Error Codes\n\n| Status | Meaning |\n| --- | --- |\n| 400 | Bad Request |\n| 401 | Unauthorized |\n| 403 | Forbidden |\n| 404 | Resource Not Found |\n| 409 | Conflict |\n| 500 | Internal Server Error |\n| 502 | Payment Gateway Error |",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54304563",
-    "_collection_link": "https://go.postman.co/collection/54304563-2f236d94-6354-4202-9819-dd21119bc923?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/54304563-4747e269-1e21-461c-a931-3537ba815d33?source=collection_link"
   },
   "item": [
     {
@@ -36,7 +37,8 @@
                 "auth",
                 "register"
               ]
-            }
+            },
+            "description": "## 📖 Description\n\nCreates a new user account.\n\n# Access\n\nPublic\n\n# Request Body\n\n| Field | Type | Required |\n| --- | --- | --- |\n| name | string | ✔ |\n| email | string | ✔ |\n| password | string | ✔ |\n| role | CUSTOMER/PROVIDER | ✔ |"
           },
           "response": []
         },
@@ -47,7 +49,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"hasib@gmail.com\",\r\n    \"password\": \"12345\"\r\n}",
+              "raw": "{\r\n    \"email\": \"rozen@gmail.com\",\r\n    \"password\": \"12345\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -66,7 +68,8 @@
                 "auth",
                 "login"
               ]
-            }
+            },
+            "description": "## 📖 Description\n\nAuthenticates a user and returns an access token.\n\nPublic Endpoint\n\nReturns JWT access token\n\n## 📝 Notes\n\nAfter Login\n\nCopy the token.\n\nGo to Authorization\n\nType\n\nBearer Token\n\nPaste the token."
           },
           "response": []
         },
@@ -94,11 +97,13 @@
                 "auth",
                 "me"
               ]
-            }
+            },
+            "description": "## 📖 Description\n\nReturns information about the currently authenticated user.\n\nAuthentication Required\n\n👤 Allowed Roles\n\nAdmin  \nProvider  \nCustomer"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Authentication APIs\n\nThis module is responsible for:\n\n• User Registration  \n• User Login  \n• Current User Information\n\nAuthentication uses JWT Bearer Token."
     },
     {
       "name": "Categories",
@@ -231,7 +236,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Description\n\nCategory management endpoints.\n\nCategories are used to organize rental equipment into logical groups such as Camping, Cycling, Hiking, Fishing, etc.\n\n## 📌 Endpoints (CRUD Operations)\n\n• Create Category  \n• Get Categories  \n• Update Category  \n• Delete Category\n\n## 🔒 Authentication\n\n#### GET:\n\nPublic\n\n#### POST, PATCH, DELETE:\n\nAdmin Only"
     },
     {
       "name": "Gear",
@@ -246,7 +252,12 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"name\": \"TrailMaster Hiking Backpack 45L\",\r\n  \"description\": \"A lightweight 45-liter hiking backpack with multiple compartments, padded shoulder straps, and rain cover support for trekking and outdoor adventures.\",\r\n  \"brand\": \"Osprey\",\r\n  \"categoryId\": \"f990b1dc-319b-4bc8-96ad-e9440fb6f4c4\",\r\n  \"priceRatePerDay\": 12,\r\n  \"quantity\": 5,\r\n  \"images\": [\r\n    \"https://example.com/images/hiking-backpack-45l.jpg\"\r\n  ]\r\n}"
+              "raw": "{\r\n  \"name\": \"TrailMaster Hiking Backpack 45L\",\r\n  \"description\": \"A lightweight 45-liter hiking backpack with multiple compartments, padded shoulder straps, and rain cover support for trekking and outdoor adventures.\",\r\n  \"brand\": \"Osprey\",\r\n  \"categoryId\": \"f990b1dc-319b-4bc8-96ad-e9440fb6f4c4\",\r\n  \"priceRatePerDay\": 12,\r\n  \"quantity\": 5,\r\n  \"images\": [\r\n    \"https://example.com/images/hiking-backpack-45l.jpg\"\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "http://localhost:4000/api/gear",
@@ -261,24 +272,49 @@
               ],
               "query": [
                 {
-                  "key": "category",
-                  "value": null,
+                  "key": "searchTerm",
+                  "value": "Road Bike Speedster",
                   "disabled": true
                 },
                 {
-                  "key": "price",
-                  "value": null,
+                  "key": "categoryId",
+                  "value": "78588c02-2099-4bfa-b845-a954a90301df",
                   "type": "text",
                   "disabled": true
                 },
                 {
                   "key": "brand",
-                  "value": null,
+                  "value": "Nike",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "minPrice",
+                  "value": "12",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "16",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "2",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
                   "type": "text",
                   "disabled": true
                 }
               ]
-            }
+            },
+            "description": "## Access\n\nPublic"
           },
           "response": []
         },
@@ -317,11 +353,13 @@
                   "value": ""
                 }
               ]
-            }
+            },
+            "description": "## Access\n\nPublic"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "# 📖 Description\n\nGear endpoints provide access to all rental equipment available on the platform.\n\nCustomers can browse equipment, view details, search, filter, and sort available gear.\n\n## 📌 Endpoints\n\n• Get All Gear  \n• Get Gear Details\n\n## 🔒 Authentication\n\nPublic\n\n## 📝 Features\n\n• Pagination  \n• Search  \n• Category Filtering  \n• Price Filtering  \n• Sorting\n\n## Query Parameters\n\n| Parameter | Description         |\n| --------- | ------------------- |\n| searchTerm    | Search by gear name, brand or description |\n| categoryId  | Filter category by id    |\n| minPrice  | Minimum price per day      |\n| maxPrice  | Maximum price per day       |\n| page      | Pagination — page number         |\n| limit     | Pagination — items per page         |\n"
     },
     {
       "name": "Provider",
@@ -379,27 +417,9 @@
                 "api",
                 "provider",
                 "my-gear"
-              ],
-              "query": [
-                {
-                  "key": "category",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "price",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "brand",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                }
               ]
-            }
+            },
+            "description": "Returns only provider's gears."
           },
           "response": []
         },
@@ -443,8 +463,56 @@
         {
           "name": "Delete Gear",
           "request": {
-            "method": "GET",
-            "header": []
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:4000/api/provider/gear/:id",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "api",
+                "provider",
+                "gear",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "price",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "brand",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
           },
           "response": []
         },
@@ -465,7 +533,8 @@
                 "provider",
                 "rentalOrders"
               ]
-            }
+            },
+            "description": "Returns all rental requests for provider's gears."
           },
           "response": []
         },
@@ -521,11 +590,13 @@
                   "value": "559d995d-e978-4e86-b251-1dca9be4041d"
                 }
               ]
-            }
+            },
+            "description": "## 📝 Allowed Status\n\nPLACED  \nCONFIRMED  \nPAID  \nPICKED_UP  \nRETURNED  \nCANCELLED\n\n## 📌 Business Rules\n\nPLACED  \n↓  \nCONFIRMED  \n↓  \nPAID  \n↓  \nPICKED_UP  \n↓  \nRETURNED\n\nPLACED ------ CANCELLED  \nCONFIRMED --- CANCELLED"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Description\n\nProvider endpoints allow equipment providers to manage their rental inventory and rental requests.\n\nOnly authenticated providers can access these endpoints.\n\n## 📌 Endpoints\n\n• Create Gear  \n• My Gear  \n• Update Gear  \n• Delete Gear  \n• Rental Requests  \n• Update Rental Status\n\n## 🔒 Authentication\n\nBearer Token Required\n\n## 👤 Allowed Roles\n\nProvider Only"
     },
     {
       "name": "Rental Order",
@@ -537,7 +608,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"gearItemId\": \"dd66805f-462d-4244-b352-dcdd950f9549\",\r\n  \"startDate\": \"2026-07-13T00:00:00.000Z\",\r\n  \"endDate\": \"2026-07-16T00:00:00.000Z\",\r\n  \"quantity\": 1\r\n}",
+              "raw": "{\r\n  \"gearItemId\": \"e5e59e1b-38df-49f9-a029-b64077330dba\",\r\n  \"startDate\": \"2026-07-13T00:00:00.000Z\",\r\n  \"endDate\": \"2026-07-16T00:00:00.000Z\",\r\n  \"quantity\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -554,27 +625,9 @@
               "path": [
                 "api",
                 "rentals"
-              ],
-              "query": [
-                {
-                  "key": "category",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "price",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "brand",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                }
               ]
-            }
+            },
+            "description": "## Access\n\nCustomer\n\n## 📖 Description\n\nCreates a rental order and immediately initializes ###SSLCommerz payment.\n\n## 📥 Request Body\n\n``` json\n{  \n\"gearItemId\":\"uuid\",  \n\"quantity\":1,  \n\"startDate\":\"2026-07-13T00:00:00.000Z\",  \n\"endDate\":\"2026-07-16T00:00:00.000Z\"  \n}\n\n ```\n\n## 📤 Success Response\n\n``` json\n{  \n\"success\":true,  \n\"message\":\"Rental Order created successfully\",  \n\"data\":{  \n\"rentalOrder\":{\n   },\n    \"paymentUrl\":\"https://sandbox.sslcommerz.com/...\",\n    \"tranId\":\"TRNX_ID_172123123\"\n }\n}\n\n ```\n\n## 📝 Business Flow\n\nCreate Rental  \n↓  \nStock Validation  \n↓  \nRental Order Created  \n↓  \nPayment Session Created  \n↓  \nReturn paymentUrl"
           },
           "response": []
         },
@@ -582,7 +635,20 @@
           "name": "Get Customer Rental Order",
           "request": {
             "method": "GET",
-            "header": []
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/api/rentals",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "api",
+                "rentals"
+              ]
+            },
+            "description": "Returns logged-in customer's rentals."
           },
           "response": []
         },
@@ -596,7 +662,12 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": ""
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "http://localhost:4000/api/rentals/:id",
@@ -632,7 +703,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": ""
+                  "value": "d97ad3b0-70cf-4abf-ae59-70d0220509ec"
                 }
               ]
             }
@@ -661,36 +732,19 @@
                 "cancel",
                 ":id"
               ],
-              "query": [
-                {
-                  "key": "category",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "price",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "brand",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                }
-              ],
               "variable": [
                 {
                   "key": "id",
                   "value": "559d995d-e978-4e86-b251-1dca9be4041d"
                 }
               ]
-            }
+            },
+            "description": "## 📝 Business Rules\n\n#### Can cancel only if :\n\nPLACED  \nor  \nCONFIRMED\n\n#### Cannot cancel:\n\nPAID  \nPICKED_UP  \nRETURNED"
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Description\n\nRental endpoints manage the complete rental lifecycle.\n\nCustomers can create rentals, view their rental history, retrieve rental details, and cancel eligible rental orders.\n\n## 📌 Endpoints\n\n• Create Rental  \n• Get Rentals  \n• Get Rental Details  \n• Cancel Rental\n\n## 🔒 Authentication\n\nBearer Token Required\n\n## 👤 Allowed Roles\n\nCustomer Only\n\n## 📝 Rental Status\n\nPending  \nConfirmed  \nActive  \nCompleted  \nCancelled"
     },
     {
       "name": "Payment",
@@ -720,32 +774,14 @@
                 "api",
                 "payments",
                 "create"
-              ],
-              "query": [
-                {
-                  "key": "category",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "price",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "brand",
-                  "value": null,
-                  "type": "text",
-                  "disabled": true
-                }
               ]
-            }
+            },
+            "description": "## 📖 Description\n\nCreates another payment session if previous payment wasn't completed.\n\n## 📥 Request Body\n\n``` json\n {\n    \"rentalOrderId\":\"5856936b-bd33-415c-91b1-0558327c243c\"\n }\n\n ```\n\n## 📤 Success Response\n\n``` json\n{\n    \"paymentUrl\":\"https://sandbox.sslcommerz.com/...\",\n    \"tranId\":\"TRNX_ID_17231\"\n}\n\n ```"
           },
           "response": []
         },
         {
-          "name": "Get Customer Payment",
+          "name": "Get Customer Payment History",
           "request": {
             "method": "GET",
             "header": [],
@@ -761,12 +797,13 @@
                 "payments",
                 "customer"
               ]
-            }
+            },
+            "description": "Returns all customer payments."
           },
           "response": []
         },
         {
-          "name": "Get Payment By Id",
+          "name": "Get Payment Details By Id",
           "request": {
             "auth": {
               "type": "noauth"
@@ -795,7 +832,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Description\n\nPayment endpoints manage rental payment processing and transaction history.\n\nSupported gateways include Stripe and SSLCommerz.\n\nIn our project we implemented the SSLCommerz payment method.\n\n## 📌 Endpoints\n\n• Initialize Payment  \n• Confirm Payment  \n• Payment History  \n• Payment Details\n\n## 🔒 Authentication\n\nBearer Token Required\n\n## 👤 Allowed Roles\n\nCustomer Only\n\n## 📝 Features\n\n• Secure Payment Processing  \n• Transaction History  \n• Payment Status Tracking\n\n## 📝 Confirm Payment\n\nCalled automatically by SSLCommerz after successful payment. That's why we do not need to call it from here.\n\nNormally frontend never calls this endpoint manually.\n\n#### Query\n\norderId\n\ntranId\n\nstatus"
     },
     {
       "name": "Review",
@@ -807,7 +845,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"rentalOrderId\": \"0f665faa-116b-4558-af97-57426c39301d\",\r\n  \"rating\": 5,\r\n  \"comment\": \"Great gear, worked perfectly for the whole weekend.\"\r\n}",
+              "raw": "{\r\n  \"rentalOrderId\": \"18034b29-6d62-457b-9b8c-969753322426\",\r\n  \"rating\": 5,\r\n  \"comment\": \"Great gear, worked perfectly for the whole weekend.\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -848,7 +886,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Description\n\nReview endpoints allow customers to share their rental experience after completing a rental.\n\n## 📌 Endpoints\n\n• Create Review\n\n## 🔒 Authentication\n\nBearer Token Required\n\n## 👤 Allowed Roles\n\nCustomer Only\n\n## 📝 Rules\n\n• Reviews can only be submitted for completed rentals.  \n• Each rental can only receive one review, means customer can review only once."
     },
     {
       "name": "Admin",
@@ -949,7 +988,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "78891e71-877a-4296-921c-f2022f3464d0"
+                  "value": "0ab687ea-c9a3-4d57-be34-afdeec5c7e0a"
                 }
               ]
             }
@@ -1050,7 +1089,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "## 📖 Description\n\nAdministrative endpoints provide complete platform management functionality.\n\nOnly administrators can access these resources.\n\n## 📌 Endpoints\n\n• Users  \n• Suspend User  \n• All Gear  \n• Provider Requests\n\n## 🔒 Authentication\n\nBearer Token Required\n\n## 👤 Allowed Roles\n\nAdmin Only\n\n## 📝 Features\n\n• User Management  \n• Provider Approval  \n• Equipment Moderation  \n• Platform Administration"
     }
   ]
 }

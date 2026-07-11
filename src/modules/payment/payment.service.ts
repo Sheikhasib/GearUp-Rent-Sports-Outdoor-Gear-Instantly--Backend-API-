@@ -183,7 +183,7 @@ const confirmPayment = async (
   return { alreadyProcessed: false, status: "FAILED" };
 };
 
-// 4. Get Customer payment
+// 4. Get Customer payment history
 const getCustomerPayment = async (customerId: string) => {
   const customerPayment = await prisma.payment.findMany({
     where: {
@@ -207,7 +207,7 @@ const getCustomerPayment = async (customerId: string) => {
   return customerPayment;
 };
 
-// 5. Get Payment By Id
+// 5. Get Payment Details By Id
 const getPaymentById = async (
   paymentId: string,
   customerId: string,
